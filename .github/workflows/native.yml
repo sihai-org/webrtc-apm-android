@@ -58,6 +58,7 @@ jobs:
           mkdir -p dist
           version=$(sed -n 's/^version=//p' gradle.properties)
           cp apm/build/outputs/aar/apm-release.aar "dist/webrtc-apm-android-$version.aar"
+          python3 scripts/verify_aar.py "dist/webrtc-apm-android-$version.aar"
           ./gradlew :consumer:assembleRelease :consumer:assembleReleaseAndroidTest :consumer:lintRelease
       - name: Verify on Android 10 emulator
         run: bash scripts/emulator_test.sh

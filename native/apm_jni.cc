@@ -29,6 +29,7 @@ struct Session {
   webrtc::Environment environment = webrtc::CreateEnvironment();
   std::unique_ptr<webrtc::TaskQueueBase, webrtc::TaskQueueDeleter> dump_queue;
   webrtc::scoped_refptr<AudioProcessing> apm;
+  bool linear_output_configured = false;
   std::vector<const float*> input_channels;
   std::vector<float*> output_channels;
   std::vector<std::array<float, 160>> linear;
@@ -97,6 +98,7 @@ jlong Create(JNIEnv* env, jobject, jdoubleArray config, jdoubleArray echo,
     Invalid(env, "Invalid APM configuration"); return 0;
   }
   webrtc::BuiltinAudioProcessingBuilder builder(c);
+  bool linear_output_configured = false;
   if (multi && !echo) {
     Invalid(env, "A multichannel AEC3 override requires a base AEC3 config"); return 0;
   }
@@ -113,10 +115,17 @@ jlong Create(JNIEnv* env, jobject, jdoubleArray config, jdoubleArray echo,
         Invalid(env, "Invalid multichannel AEC3 configuration"); return 0;
       }
     }
+    linear_output_configured = base.filter.export_linear_aec_output &&
+        (!multichannel || multichannel->filter.export_linear_aec_output);
     builder.SetEchoCancellerConfig(base, multichannel);
+  }
+  if (c.echo_canceller.export_linear_aec_output && !linear_output_configured) {
+    Invalid(env, "Linear output requires Aec3Config.filter.exportLinearAecOutput in each supplied AEC3 config");
+    return 0;
   }
   if (residual) builder.SetEchoDetector(webrtc::make_ref_counted<webrtc::ResidualEchoDetector>());
   auto session = std::make_unique<Session>();
+  session->linear_output_configured = linear_output_configured;
   session->apm = builder.Build(session->environment);
   if (!session->apm) return 0;
   return reinterpret_cast<jlong>(session.release());
@@ -140,6 +149,10 @@ void ApplyConfig(JNIEnv* env, jobject, jlong handle, jdoubleArray values) {
   AudioProcessing::Config config;
   if (!apm_android::Decode(Read(env, values), &config) || !ValidConfig(config)) {
     Invalid(env, "Invalid APM configuration"); return;
+  }
+  if (config.echo_canceller.export_linear_aec_output && !Get(handle).linear_output_configured) {
+    Invalid(env, "Recreate with AEC3 linear output configured before enabling the APM output");
+    return;
   }
   Get(handle).apm->ApplyConfig(config);
 }
@@ -182,9 +195,15 @@ jint Process(JNIEnv* env, jobject, jlong handle, jint direction, jboolean floati
   StreamConfig in(rate, channels), out(out_rate, out_channels);
   if (!floating) {
     if (direction == 2) return AudioProcessing::kBadParameterError;
+    if (rate != out_rate || channels != out_channels) return AudioProcessing::kBadParameterError;
     auto source = Buffer<int16_t>(env, input, offset, input_bytes / 2);
     auto destination = Buffer<int16_t>(env, output, out_offset, output_bytes / 2);
     if (source.empty() || destination.empty()) return AudioProcessing::kBadDataLengthError;
+    // Upstream PCM16 skips writing dest when no processing stage is active.
+    // Its native callers use in-place frames; preserve that contract for our
+    // distinct input/output buffers without bypassing APM analysis or state.
+    if (source.data() != destination.data())
+      std::copy(source.begin(), source.end(), destination.begin());
     return direction == 0 ? apm.ProcessStream(source.data(), in, out, destination.data()) :
         apm.ProcessReverseStream(source.data(), in, out, destination.data());
   }

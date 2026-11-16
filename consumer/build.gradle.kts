@@ -15,6 +15,7 @@ android {
         targetCompatibility = JavaVersion.VERSION_11
     }
     testBuildType = "release"
+    packaging { jniLibs.keepDebugSymbols += "**/libwebrtc_apm_jni.so" }
     buildTypes {
         getByName("release") {
             signingConfig = signingConfigs.getByName("debug")
@@ -31,4 +32,5 @@ dependencies {
     androidTestImplementation("androidx.test:runner:1.6.2")
     androidTestImplementation("androidx.test.ext:junit:1.2.1")
     androidTestImplementation("junit:junit:4.13.2")
+    androidTestCompileOnly("com.google.errorprone:error_prone_annotations:2.38.0")
 }

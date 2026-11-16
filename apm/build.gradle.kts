@@ -12,6 +12,8 @@ android {
     }
     sourceSets["main"].jniLibs.srcDir(layout.buildDirectory.dir("native/jni"))
     sourceSets["main"].resources.srcDir(layout.buildDirectory.dir("native/resources"))
+    // GN already strips this binary; preserve its provenance hash byte-for-byte.
+    packaging { jniLibs.keepDebugSymbols += "**/libwebrtc_apm_jni.so" }
     lint { abortOnError = true }
 }
 kotlin { compilerOptions { jvmTarget.set(org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_11) } }

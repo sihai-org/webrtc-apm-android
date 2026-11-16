@@ -43,11 +43,31 @@ class ApmInstrumentedTest {
             AudioProcessing().use { apm ->
                 apm.initialize(ProcessingFormats(format))
                 assertEquals(0, apm.processRender(input, output, format))
+                for (i in 0 until format.samples) assertEquals(input.getShort(i * 2), output.getShort(i * 2))
                 assertEquals(0, apm.processCapture(input, output, format))
                 for (i in 0 until format.samples) assertEquals(input.getShort(i * 2), output.getShort(i * 2))
                 assertEquals(0, input.position())
                 apm.initialize()
             }
+        }
+    }
+
+    @Test fun linearOutputRejectsInconsistentOuterAndInnerConfiguration() {
+        val config = ApmConfig().apply { echoCanceller.enabled = true; echoCanceller.exportLinearAecOutput = true }
+        assertThrows(IllegalArgumentException::class.java) { AudioProcessing(config).close() }
+        AudioProcessing().use { apm ->
+            assertThrows(IllegalArgumentException::class.java) { apm.applyConfig(config) }
+            assertFalse(apm.configuration().echoCanceller.exportLinearAecOutput)
+        }
+        val aec3 = Aec3Config().apply { filter.exportLinearAecOutput = true }
+        AudioProcessing(ApmConfig(), aec3).use { apm ->
+            apm.applyConfig(config)
+            val format = StreamFormat(16000, 1)
+            val frame = AudioProcessing.buffer(format)
+            apm.processRender(frame, frame, format)
+            apm.setStreamDelayMs(0)
+            apm.processCapture(frame, frame, format)
+            assertTrue(apm.linearAecOutput(AudioProcessing.buffer(format, true)))
         }
     }
 
@@ -88,8 +108,9 @@ class ApmInstrumentedTest {
         val format = StreamFormat(16000, 1)
         val audio = AudioProcessing.buffer(format)
         val config = ApmConfig().apply { echoCanceller.enabled = true; echoCanceller.exportLinearAecOutput = true }
+        val aec3 = Aec3Config().apply { filter.exportLinearAecOutput = true }
         try {
-            AudioProcessing(config).use { apm ->
+            AudioProcessing(config, aec3).use { apm ->
                 assertTrue(apm.startAecDump(file, 1000000))
                 apm.setAnalogLevel(128)
                 apm.setKeyPressed(false)

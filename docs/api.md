@@ -66,7 +66,7 @@ AGC 的 analog/input-volume 模式只返回推荐硬件音量，不会代替应�
 - 上游 `-13` 表示参数被调整的非致命警告，以返回码保留；不能当作无错误忽略。
 - `setRuntimeSetting(queued=true)` 对应 `PostRuntimeSetting`，返回 false 表示队列未接受，调用方决定处理方式；默认对应 `SetRuntimeSetting`。
 - `statistics()` 保留所有上游可选统计，缺少测量返回 null，不把缺失伪装成零。多方拉取统计会影响上游聚合窗口，应用应统一统计读取职责。
-- `linearAecOutput` 要先开启 `echoCanceller.exportLinearAecOutput`，返回 16kHz planar float，每个处理通道 160 个采样；false 表示当前没有输出。
+- `linearAecOutput` 要在构造时提供 `Aec3Config.filter.exportLinearAecOutput=true`（若提供多通道覆盖，也须开启同一字段），并开启 `ApmConfig.echoCanceller.exportLinearAecOutput`。该上游版本不会替调用方联动两层开关；包装层拒绝缺少底层配置的组合，避免 native 崩溃。底层已配置后可以用 applyConfig 切换外层导出开关。返回 16kHz planar float，每个处理通道 160 个采样；false 表示当前没有输出。
 - `startAecDump` 接受 File 或 ParcelFileDescriptor。复制 fd，调用方仍拥有原 descriptor；native 工作队列随实例持有，detach/close 等待必要的写入收尾。
 - AEC dump 包含音频，应写入调用方控制的临时位置，用后删除；库不自动录制、上传或持续保存。
 

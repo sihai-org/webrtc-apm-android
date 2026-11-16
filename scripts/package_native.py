@@ -32,6 +32,11 @@ def main():
         header = subprocess.check_output([args.readelf, '-h', str(library)], text=True)
         if machine not in header:
             raise SystemExit(f'Wrong ELF architecture for {abi}')
+        if abi == 'arm64-v8a':
+            segments = subprocess.check_output([args.readelf, '-l', '--wide', str(library)], text=True)
+            loads = [line.split() for line in segments.splitlines() if line.strip().startswith('LOAD ')]
+            if not loads or any(int(parts[-1], 16) < 16384 for parts in loads):
+                raise SystemExit('ARM64 ELF must preserve upstream 16KiB LOAD alignment')
         symbols = subprocess.check_output([args.readelf, '--dyn-syms', '--wide', str(library)], text=True)
         exported = []
         for line in symbols.splitlines():
