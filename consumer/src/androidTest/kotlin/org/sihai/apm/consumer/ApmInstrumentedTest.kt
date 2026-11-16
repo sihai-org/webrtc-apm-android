@@ -17,6 +17,9 @@ class ApmInstrumentedTest {
     @Test fun nativeDefaultsConfigRoundtripAndCopies() {
         val config = ApmConfig()
         assertFalse(config.echoCanceller.enabled)
+        AudioProcessing(config).use { apm ->
+            assertFalse(apm.linearAecOutput(AudioProcessing.buffer(StreamFormat(16000, 1), true)))
+        }
         val copy = config.copy()
         copy.echoCanceller.enabled = true
         copy.noiseSuppression.enabled = true

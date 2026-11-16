@@ -7,6 +7,8 @@ shared_library("webrtc_apm_jni") {
     "upstream_generated.h",
   ]
   configs += rtc_common_configs
+  # Match rtc_* targets: Chromium's private style plugin rejects WebRTC headers.
+  configs -= rtc_remove_configs
   ldflags = [ "-Wl,--version-script=" + rebase_path("exports.map", root_build_dir) ]
   inputs = [ "exports.map" ]
   deps = [

@@ -125,12 +125,14 @@ void Destroy(JNIEnv*, jobject, jlong handle) { delete &Get(handle); }
 jint Initialize(JNIEnv* env, jobject, jlong handle, jintArray formats) {
   if (!formats) return Get(handle).apm->Initialize();
   if (env->GetArrayLength(formats) != 8) return AudioProcessing::kBadParameterError;
-  jint v[8]; env->GetIntArrayRegion(formats, 0, 8, v);
+  std::array<jint, 8> v;
+  env->GetIntArrayRegion(formats, 0, 8, v.data());
   webrtc::ProcessingConfig config;
+  std::span streams(config.streams);
   for (int i = 0; i < 4; ++i) {
     if (v[i*2] < 8000 || v[i*2] > 384000 || v[i*2+1] <= 0)
       return AudioProcessing::kBadParameterError;
-    config.streams[i] = StreamConfig(v[i*2], v[i*2+1]);
+    streams[i] = StreamConfig(v[i*2], v[i*2+1]);
   }
   return Get(handle).apm->Initialize(config);
 }
@@ -144,13 +146,18 @@ void ApplyConfig(JNIEnv* env, jobject, jlong handle, jdoubleArray values) {
 jdoubleArray GetConfig(JNIEnv* env, jobject, jlong handle) {
   return Array(env, apm_android::Encode(Get(handle).apm->GetConfig()));
 }
-void* Buffer(JNIEnv* env, jobject buffer, jint offset, int64_t bytes, int alignment) {
-  if (!buffer || offset < 0 || bytes <= 0) return nullptr;
+template <typename T>
+std::span<T> Buffer(JNIEnv* env, jobject buffer, jint offset, int64_t samples) {
+  if (!buffer || offset < 0 || samples <= 0) return {};
   auto capacity = env->GetDirectBufferCapacity(buffer);
   auto* base = static_cast<uint8_t*>(env->GetDirectBufferAddress(buffer));
-  if (!base || static_cast<int64_t>(offset) + bytes > capacity ||
-      reinterpret_cast<uintptr_t>(base + offset) % alignment != 0) return nullptr;
-  return base + offset;
+  if (!base || offset > capacity || samples > (capacity - offset) / int64_t(sizeof(T)) ||
+      (reinterpret_cast<uintptr_t>(base) + offset) % alignof(T) != 0) return {};
+  // JNI gives a raw pointer plus capacity, not a C++ range. The checks above
+  // establish this exact subrange and alignment before entering span-based code.
+#pragma clang unsafe_buffer_usage begin
+  return {reinterpret_cast<T*>(base + offset), static_cast<size_t>(samples)};
+#pragma clang unsafe_buffer_usage end
 }
 jint Process(JNIEnv* env, jobject, jlong handle, jint direction, jboolean floating,
              jobject input, jint offset, jint rate, jint channels,
@@ -161,11 +168,11 @@ jint Process(JNIEnv* env, jobject, jlong handle, jint direction, jboolean floati
   const int width = floating ? 4 : 2;
   const int64_t input_bytes = int64_t(rate / 100) * channels * width;
   const int64_t output_bytes = int64_t(out_rate / 100) * out_channels * width;
-  auto* src = Buffer(env, input, offset, input_bytes, width);
-  auto* dst = direction == 2 ? nullptr : Buffer(env, output, out_offset, output_bytes, width);
-  if (!src || (direction != 2 && !dst)) return AudioProcessing::kBadDataLengthError;
-  if (dst) {
-    uintptr_t s = reinterpret_cast<uintptr_t>(src), d = reinterpret_cast<uintptr_t>(dst);
+  auto src = Buffer<uint8_t>(env, input, offset, input_bytes);
+  auto dst = direction == 2 ? std::span<uint8_t>() : Buffer<uint8_t>(env, output, out_offset, output_bytes);
+  if (src.empty() || (direction != 2 && dst.empty())) return AudioProcessing::kBadDataLengthError;
+  if (!dst.empty()) {
+    uintptr_t s = reinterpret_cast<uintptr_t>(src.data()), d = reinterpret_cast<uintptr_t>(dst.data());
     if (s < d + output_bytes && d < s + input_bytes &&
         !(s == d && rate == out_rate && channels == out_channels))
       return AudioProcessing::kBadParameterError;
@@ -175,16 +182,23 @@ jint Process(JNIEnv* env, jobject, jlong handle, jint direction, jboolean floati
   StreamConfig in(rate, channels), out(out_rate, out_channels);
   if (!floating) {
     if (direction == 2) return AudioProcessing::kBadParameterError;
-    return direction == 0 ? apm.ProcessStream(static_cast<int16_t*>(src), in, out, static_cast<int16_t*>(dst)) :
-        apm.ProcessReverseStream(static_cast<int16_t*>(src), in, out, static_cast<int16_t*>(dst));
+    auto source = Buffer<int16_t>(env, input, offset, input_bytes / 2);
+    auto destination = Buffer<int16_t>(env, output, out_offset, output_bytes / 2);
+    if (source.empty() || destination.empty()) return AudioProcessing::kBadDataLengthError;
+    return direction == 0 ? apm.ProcessStream(source.data(), in, out, destination.data()) :
+        apm.ProcessReverseStream(source.data(), in, out, destination.data());
   }
+  auto source = Buffer<float>(env, input, offset, input_bytes / 4);
+  if (source.empty()) return AudioProcessing::kBadDataLengthError;
   session.input_channels.resize(channels);
   for (int i = 0; i < channels; ++i)
-    session.input_channels[i] = static_cast<float*>(src) + i * in.num_frames();
+    session.input_channels[i] = source.subspan(i * in.num_frames(), in.num_frames()).data();
   if (direction == 2) return apm.AnalyzeReverseStream(session.input_channels.data(), in);
+  auto destination = Buffer<float>(env, output, out_offset, output_bytes / 4);
+  if (destination.empty()) return AudioProcessing::kBadDataLengthError;
   session.output_channels.resize(out_channels);
   for (int i = 0; i < out_channels; ++i)
-    session.output_channels[i] = static_cast<float*>(dst) + i * out.num_frames();
+    session.output_channels[i] = destination.subspan(i * out.num_frames(), out.num_frames()).data();
   return direction == 0 ? apm.ProcessStream(session.input_channels.data(), in, out, session.output_channels.data()) :
       apm.ProcessReverseStream(session.input_channels.data(), in, out, session.output_channels.data());
 }
@@ -247,13 +261,15 @@ jdoubleArray Statistics(JNIEnv* env, jobject, jlong handle, jint remote) {
 }
 jboolean Linear(JNIEnv* env, jobject, jlong handle, jobject output, jint offset, jint channels) {
   auto& session = Get(handle);
+  const auto config = session.apm->GetConfig();
+  if (!config.echo_canceller.enabled || !config.echo_canceller.export_linear_aec_output) return false;
   if (channels <= 0 || static_cast<size_t>(channels) != session.apm->num_proc_channels()) return false;
-  auto* dst = static_cast<float*>(Buffer(env, output, offset, int64_t(channels)*160*4, 4));
-  if (!dst) return false;
+  auto dst = Buffer<float>(env, output, offset, int64_t(channels)*160);
+  if (dst.empty()) return false;
   session.linear.resize(channels);
   if (!session.apm->GetLinearAecOutput(std::span(session.linear))) return false;
   for (int c = 0; c < channels; ++c)
-    std::copy(session.linear[c].begin(), session.linear[c].end(), dst + c*160);
+    std::copy(session.linear[c].begin(), session.linear[c].end(), dst.subspan(c*160, 160).begin());
   return true;
 }
 jboolean StartDump(JNIEnv*, jobject, jlong handle, jint fd, jlong max_bytes) {
