@@ -2,8 +2,12 @@
 set -euo pipefail
 sdk_root="${ANDROID_HOME:?Android SDK path must be provided by the runner}"
 export PATH="$sdk_root/cmdline-tools/latest/bin:$sdk_root/platform-tools:$sdk_root/emulator:$PATH"
+export ANDROID_USER_HOME="$RUNNER_TEMP/apm-android"
+export ANDROID_AVD_HOME="$ANDROID_USER_HOME/avd"
+mkdir -p "$ANDROID_AVD_HOME"
 sdkmanager --install 'platform-tools' 'emulator' 'system-images;android-29;google_apis;x86_64'
-echo no | avdmanager create avd --name apm-ci --package 'system-images;android-29;google_apis;x86_64' --force
+echo no | avdmanager create avd --name apm-ci --path "$ANDROID_AVD_HOME/apm-ci.avd" --package 'system-images;android-29;google_apis;x86_64' --force
+test -f "$ANDROID_AVD_HOME/apm-ci.ini"
 if [[ -e /dev/kvm ]]; then sudo chmod 666 /dev/kvm; fi
 "$ANDROID_HOME/emulator/emulator" -avd apm-ci -no-window -no-audio -no-boot-anim -gpu swiftshader_indirect > "$RUNNER_TEMP/apm-emulator.log" 2>&1 &
 emulator_pid=$!
