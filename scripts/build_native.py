@@ -39,12 +39,18 @@ def main():
         'name': 'src', 'url': lock['webrtc_url'], 'deps_file': 'DEPS',
         'managed': False, 'custom_deps': {}, 'custom_vars': {},
     }]) + '\ntarget_os = ["android"]\n')
+    source = checkout / 'src'
+    # This is a dedicated, disposable build checkout. Undo only our GN-root
+    # overlay before syncing a revision; never reset the user's wrapper repo.
+    if (source / 'apm_android').is_dir():
+        run('git', 'restore', '--', '.gn', cwd=source, env=env)
     run('gclient', 'sync', '--revision', 'src@' + lock['webrtc_revision'],
         '--no-history', '--shallow', '--nohooks', '-j', '8', cwd=checkout, env=env)
     run('gclient', 'runhooks', cwd=checkout, env=env)
-    source = checkout / 'src'
     run(sys.executable, ROOT / 'scripts/generate_config.py', '--upstream', source, '--check')
     shutil.copytree(ROOT / 'native', source / 'apm_android', dirs_exist_ok=True)
+    dotfile = source / '.gn'
+    dotfile.write_text(dotfile.read_text() + '\n# Android APM packaging root.\nroot = "//apm_android:webrtc_apm_jni"\n')
     cpu = {'arm64-v8a': 'arm64', 'armeabi-v7a': 'arm', 'x86_64': 'x64'}[args.abi]
     output = source / 'out' / args.abi
     gn_args = (f'target_os="android" target_cpu="{cpu}" is_debug=false '

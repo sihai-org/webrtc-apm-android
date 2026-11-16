@@ -6,6 +6,8 @@
 
 不在仓库提交完整 WebRTC checkout、算法副本或 native 二进制。`native/` 复制到 checkout 的 `apm_android/`，通过官方 GN target 链接 APM、JNI 和静态运行库。只导出 JNI_OnLoad。
 
+构建工作目录必须专用于本脚本。脚本在其 `.gn` 设置独立 target 为 root，使编译和许可证依赖分析使用同一个图；下一次 sync 前仅撤回这一构建入口覆盖，不重置用户的包装仓库，也不修改算法源码。
+
 ## Linux native 构建
 
 ```bash
