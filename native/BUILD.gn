@@ -1,8 +1,11 @@
 import("//webrtc.gni")
 
 rtc_shared_library("webrtc_apm_jni") {
-  sources = [ "apm_jni.cc" ]
-  configs += [ "//:common_config" ]
+  sources = [
+    "apm_jni.cc",
+    "config_generated.h",
+    "upstream_generated.h",
+  ]
   deps = [
     "//api:make_ref_counted",
     "//api/audio:builtin_audio_processing_builder",

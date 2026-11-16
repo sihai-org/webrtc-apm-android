@@ -108,11 +108,46 @@ class ApmInstrumentedTest {
         val failure = AtomicReference<Throwable?>()
         val worker = Thread {
             try { repeat(1000) { apm.processCapture(audio, audio, format) } }
-            catch (_: IllegalStateException) { /* close is serialized with processing */ }
+            catch (error: IllegalStateException) {
+                if (error.message != "APM is closed") failure.set(error)
+            }
             catch (error: Throwable) { failure.set(error) }
         }
         worker.start(); apm.close(); worker.join()
         failure.get()?.let { throw AssertionError(it) }
+    }
+
+    @Test fun noiseSuppressionAndFixedDigitalGainAffectSamples() {
+        val format = StreamFormat(16000, 1)
+        val input = AudioProcessing.buffer(format)
+        val output = AudioProcessing.buffer(format)
+        val noise = Random(912)
+        var before = 0.0
+        var after = 0.0
+        val ns = ApmConfig().apply {
+            noiseSuppression.enabled = true
+            noiseSuppression.level = ApmConfig.NoiseSuppression.Level.High
+        }
+        AudioProcessing(ns).use { apm ->
+            repeat(500) { frame ->
+                for (i in 0 until 160) input.putShort(i * 2, (noise.nextInt(2000) - 1000).toShort())
+                apm.processCapture(input, output, format)
+                if (frame >= 400) for (i in 0 until 160) {
+                    before += input.getShort(i * 2).toDouble().let { it * it }
+                    after += output.getShort(i * 2).toDouble().let { it * it }
+                }
+            }
+        }
+        assertTrue("NS must reduce stationary noise energy", after < before * 0.5)
+        val gain = ApmConfig().apply {
+            gainController2.enabled = true
+            gainController2.fixedDigital.gainDb = 6f
+        }
+        AudioProcessing(gain).use { apm ->
+            for (i in 0 until 160) input.putShort(i * 2, 1000)
+            repeat(20) { apm.processCapture(input, output, format) }
+            assertTrue("AGC2 fixed +6dB gain must be applied", output.getShort(100).toInt() in 1800..2200)
+        }
     }
 
     @Test fun syntheticEchoIsAttenuatedWhileNearEndOnlyIsRetained() {

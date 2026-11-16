@@ -154,9 +154,12 @@ class AudioProcessing(
         require(maxBytes == -1L || maxBytes > 0)
         return NativeBridge.startDump(alive(), descriptor.fd, maxBytes)
     }
-    @Synchronized fun startAecDump(file: File, maxBytes: Long = -1): Boolean =
-        ParcelFileDescriptor.open(file, ParcelFileDescriptor.MODE_CREATE or ParcelFileDescriptor.MODE_TRUNCATE or
+    @Synchronized fun startAecDump(file: File, maxBytes: Long = -1): Boolean {
+        alive()
+        require(maxBytes == -1L || maxBytes > 0)
+        return ParcelFileDescriptor.open(file, ParcelFileDescriptor.MODE_CREATE or ParcelFileDescriptor.MODE_TRUNCATE or
             ParcelFileDescriptor.MODE_WRITE_ONLY).use { startAecDump(it, maxBytes) }
+    }
     @Synchronized fun stopAecDump() { NativeBridge.stopDump(alive()) }
     @Synchronized override fun close() {
         if (handle != 0L) { NativeBridge.destroy(handle); handle = 0 }
