@@ -39,8 +39,9 @@ schema 属于上游头文件的生成投影；Kotlin 配置类、C++ 数组映�
 python3 scripts/package_native.py incoming
 ./gradlew :apm:assembleRelease :apm:lintRelease
 mkdir -p dist
-cp apm/build/outputs/aar/apm-release.aar dist/webrtc-apm-android-0.1.0.aar
-python3 scripts/verify_aar.py dist/webrtc-apm-android-0.1.0.aar
+version=$(sed -n 's/^version=//p' gradle.properties)
+cp apm/build/outputs/aar/apm-release.aar "dist/webrtc-apm-android-$version.aar"
+python3 scripts/verify_aar.py "dist/webrtc-apm-android-$version.aar"
 ./gradlew :consumer:assembleRelease :consumer:assembleReleaseAndroidTest :consumer:lintRelease
 ./gradlew :consumer:connectedReleaseAndroidTest
 ```
@@ -51,11 +52,15 @@ consumer 通过文件依赖引用 `dist/` 中的版本 AAR，不使用 project d
 
 模拟器执行入口是 `scripts/emulator_test.sh`。测试没有麦克风和网络权限；验证离线 PCM、配置、dump、错误边界和合成回声。报告由 CI 上传，不能把未执行或失败解释为通过。
 
+`Emulator environment check` 工作流单独执行同一脚本的 `--boot-only` 模式，用于定位 runner、SDK 和 AVD 启动问题；它不验证 APM，也不能代替正式发布流程。SDK 工具与模拟器使用共同的临时 ANDROID_AVD_HOME；启动失败时保留并输出日志，而不是只等待 adb 超时。
+
 ## GitHub Actions 与版本
 
 手动触发 `Build and verify AAR`，默认三个 ABI。单 ABI 输入只用于定位构建问题，不产生正式发行包。正式发行基于 `v<version>` tag，版本必须与 `gradle.properties` 相同。
 
 所有 native 作业成功后才能打包；AAR lint、独立消费编译、模拟器测试全部通过后才创建 Release。失败不会创建新 Release，也不覆盖已发布版本。修复已经发布的版本应递增版本。
+
+已经推送的候选 tag 也不移动或重写。若候选流程失败并需要改代码或工作流，修复后使用新版本 tag；没有成功 Release 的 tag 不代表可用发行版本。
 
 Release 附件包括：
 
