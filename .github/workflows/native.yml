@@ -1,0 +1,32 @@
+name: Native build
+on:
+  workflow_dispatch:
+    inputs:
+      abis:
+        description: 'JSON ABI array'
+        default: '["armeabi-v7a","arm64-v8a","x86_64"]'
+        required: true
+jobs:
+  build:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 350
+    strategy:
+      fail-fast: false
+      matrix:
+        abi: ${{ fromJSON(inputs.abis) }}
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+      - name: Prepare runner
+        run: |
+          sudo rm -rf /usr/share/dotnet /usr/local/lib/android /opt/ghc /opt/hostedtoolcache/CodeQL
+          sudo apt-get update
+          sudo apt-get install -y build-essential pkg-config libglib2.0-dev libnss3-dev libnspr4-dev
+          df -h
+      - name: Build official APM and JNI
+        run: python3 scripts/build_native.py --work "$RUNNER_TEMP/apm-build" --abi '${{ matrix.abi }}'
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: native-${{ matrix.abi }}
+          path: dist/
+          if-no-files-found: error
+          retention-days: 7

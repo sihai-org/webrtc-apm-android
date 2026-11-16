@@ -1,0 +1,13 @@
+import("//webrtc.gni")
+
+rtc_shared_library("webrtc_apm_jni") {
+  sources = [ "apm_jni.cc" ]
+  configs += [ "//:common_config" ]
+  deps = [
+    "//api/audio:builtin_audio_processing_builder",
+    "//api/environment:environment_factory",
+  ]
+  allow_poison = [ "environment_construction" ]
+  java_targets = []
+  output_extension = "so"
+}

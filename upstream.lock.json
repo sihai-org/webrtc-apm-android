@@ -1,0 +1,7 @@
+{
+  "webrtc_url": "https://webrtc.googlesource.com/src.git",
+  "webrtc_revision": "4148cab7a701a82563fcad0d860e677aaa539c45",
+  "depot_tools_url": "https://chromium.googlesource.com/chromium/tools/depot_tools.git",
+  "depot_tools_revision": "ec77017fb3e090ff02bffb9c6980ebcdd3006ddc",
+  "android_api": 29
+}
