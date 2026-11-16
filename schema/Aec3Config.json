@@ -1,0 +1,701 @@
+[
+  {
+    "name": "buffering",
+    "fields": [
+      {
+        "name": "excess_render_detection_interval_blocks",
+        "type": "size_t"
+      },
+      {
+        "name": "max_allowed_excess_render_blocks",
+        "type": "size_t"
+      }
+    ]
+  },
+  {
+    "name": "delay",
+    "fields": [
+      {
+        "name": "default_delay",
+        "type": "size_t"
+      },
+      {
+        "name": "down_sampling_factor",
+        "type": "size_t"
+      },
+      {
+        "name": "num_filters",
+        "type": "size_t"
+      },
+      {
+        "name": "delay_headroom_samples",
+        "type": "size_t"
+      },
+      {
+        "name": "hysteresis_limit_blocks",
+        "type": "size_t"
+      },
+      {
+        "name": "fixed_capture_delay_samples",
+        "type": "size_t"
+      },
+      {
+        "name": "delay_estimate_smoothing",
+        "type": "float"
+      },
+      {
+        "name": "delay_estimate_smoothing_delay_found",
+        "type": "float"
+      },
+      {
+        "name": "delay_candidate_detection_threshold",
+        "type": "float"
+      },
+      {
+        "name": "delay_selection_thresholds",
+        "fields": [
+          {
+            "name": "initial",
+            "type": "int"
+          },
+          {
+            "name": "converged",
+            "type": "int"
+          }
+        ]
+      },
+      {
+        "name": "use_external_delay_estimator",
+        "type": "bool"
+      },
+      {
+        "name": "log_warning_on_delay_changes",
+        "type": "bool"
+      },
+      {
+        "name": "render_alignment_mixing",
+        "fields": [
+          {
+            "name": "downmix",
+            "type": "bool"
+          },
+          {
+            "name": "adaptive_selection",
+            "type": "bool"
+          },
+          {
+            "name": "activity_power_threshold",
+            "type": "float"
+          },
+          {
+            "name": "prefer_first_two_channels",
+            "type": "bool"
+          }
+        ]
+      },
+      {
+        "name": "capture_alignment_mixing",
+        "fields": [
+          {
+            "name": "downmix",
+            "type": "bool"
+          },
+          {
+            "name": "adaptive_selection",
+            "type": "bool"
+          },
+          {
+            "name": "activity_power_threshold",
+            "type": "float"
+          },
+          {
+            "name": "prefer_first_two_channels",
+            "type": "bool"
+          }
+        ]
+      },
+      {
+        "name": "detect_pre_echo",
+        "type": "bool"
+      }
+    ]
+  },
+  {
+    "name": "filter",
+    "fields": [
+      {
+        "name": "refined",
+        "fields": [
+          {
+            "name": "length_blocks",
+            "type": "size_t"
+          },
+          {
+            "name": "leakage_converged",
+            "type": "float"
+          },
+          {
+            "name": "leakage_diverged",
+            "type": "float"
+          },
+          {
+            "name": "error_floor",
+            "type": "float"
+          },
+          {
+            "name": "error_ceil",
+            "type": "float"
+          },
+          {
+            "name": "noise_gate",
+            "type": "float"
+          }
+        ]
+      },
+      {
+        "name": "coarse",
+        "fields": [
+          {
+            "name": "length_blocks",
+            "type": "size_t"
+          },
+          {
+            "name": "rate",
+            "type": "float"
+          },
+          {
+            "name": "noise_gate",
+            "type": "float"
+          }
+        ]
+      },
+      {
+        "name": "refined_initial",
+        "fields": [
+          {
+            "name": "length_blocks",
+            "type": "size_t"
+          },
+          {
+            "name": "leakage_converged",
+            "type": "float"
+          },
+          {
+            "name": "leakage_diverged",
+            "type": "float"
+          },
+          {
+            "name": "error_floor",
+            "type": "float"
+          },
+          {
+            "name": "error_ceil",
+            "type": "float"
+          },
+          {
+            "name": "noise_gate",
+            "type": "float"
+          }
+        ]
+      },
+      {
+        "name": "coarse_initial",
+        "fields": [
+          {
+            "name": "length_blocks",
+            "type": "size_t"
+          },
+          {
+            "name": "rate",
+            "type": "float"
+          },
+          {
+            "name": "noise_gate",
+            "type": "float"
+          }
+        ]
+      },
+      {
+        "name": "config_change_duration_blocks",
+        "type": "size_t"
+      },
+      {
+        "name": "initial_state_seconds",
+        "type": "float"
+      },
+      {
+        "name": "coarse_reset_hangover_blocks",
+        "type": "int"
+      },
+      {
+        "name": "conservative_initial_phase",
+        "type": "bool"
+      },
+      {
+        "name": "enable_coarse_filter_output_usage",
+        "type": "bool"
+      },
+      {
+        "name": "use_linear_filter",
+        "type": "bool"
+      },
+      {
+        "name": "high_pass_filter_echo_reference",
+        "type": "bool"
+      },
+      {
+        "name": "export_linear_aec_output",
+        "type": "bool"
+      }
+    ]
+  },
+  {
+    "name": "erle",
+    "fields": [
+      {
+        "name": "min",
+        "type": "float"
+      },
+      {
+        "name": "max_l",
+        "type": "float"
+      },
+      {
+        "name": "max_h",
+        "type": "float"
+      },
+      {
+        "name": "onset_detection",
+        "type": "bool"
+      },
+      {
+        "name": "num_sections",
+        "type": "size_t"
+      },
+      {
+        "name": "clamp_quality_estimate_to_zero",
+        "type": "bool"
+      },
+      {
+        "name": "clamp_quality_estimate_to_one",
+        "type": "bool"
+      }
+    ]
+  },
+  {
+    "name": "ep_strength",
+    "fields": [
+      {
+        "name": "default_gain",
+        "type": "float"
+      },
+      {
+        "name": "default_len",
+        "type": "float"
+      },
+      {
+        "name": "nearend_len",
+        "type": "float"
+      },
+      {
+        "name": "echo_can_saturate",
+        "type": "bool"
+      },
+      {
+        "name": "bounded_erl",
+        "type": "bool"
+      },
+      {
+        "name": "erle_onset_compensation_in_dominant_nearend",
+        "type": "bool"
+      },
+      {
+        "name": "use_conservative_tail_frequency_response",
+        "type": "bool"
+      }
+    ]
+  },
+  {
+    "name": "echo_audibility",
+    "fields": [
+      {
+        "name": "low_render_limit",
+        "type": "float"
+      },
+      {
+        "name": "normal_render_limit",
+        "type": "float"
+      },
+      {
+        "name": "floor_power",
+        "type": "float"
+      },
+      {
+        "name": "audibility_threshold_lf",
+        "type": "float"
+      },
+      {
+        "name": "audibility_threshold_mf",
+        "type": "float"
+      },
+      {
+        "name": "audibility_threshold_hf",
+        "type": "float"
+      },
+      {
+        "name": "use_stationarity_properties",
+        "type": "bool"
+      },
+      {
+        "name": "use_stationarity_properties_at_init",
+        "type": "bool"
+      }
+    ]
+  },
+  {
+    "name": "render_levels",
+    "fields": [
+      {
+        "name": "active_render_limit",
+        "type": "float"
+      },
+      {
+        "name": "poor_excitation_render_limit",
+        "type": "float"
+      },
+      {
+        "name": "poor_excitation_render_limit_ds8",
+        "type": "float"
+      },
+      {
+        "name": "render_power_gain_db",
+        "type": "float"
+      }
+    ]
+  },
+  {
+    "name": "echo_removal_control",
+    "fields": [
+      {
+        "name": "has_clock_drift",
+        "type": "bool"
+      },
+      {
+        "name": "linear_and_stable_echo_path",
+        "type": "bool"
+      }
+    ]
+  },
+  {
+    "name": "echo_model",
+    "fields": [
+      {
+        "name": "noise_floor_hold",
+        "type": "size_t"
+      },
+      {
+        "name": "min_noise_floor_power",
+        "type": "float"
+      },
+      {
+        "name": "stationary_gate_slope",
+        "type": "float"
+      },
+      {
+        "name": "noise_gate_power",
+        "type": "float"
+      },
+      {
+        "name": "noise_gate_slope",
+        "type": "float"
+      },
+      {
+        "name": "render_pre_window_size",
+        "type": "size_t"
+      },
+      {
+        "name": "render_post_window_size",
+        "type": "size_t"
+      },
+      {
+        "name": "model_reverb_in_nonlinear_mode",
+        "type": "bool"
+      }
+    ]
+  },
+  {
+    "name": "comfort_noise",
+    "fields": [
+      {
+        "name": "noise_floor_dbfs",
+        "type": "float"
+      }
+    ]
+  },
+  {
+    "name": "suppressor",
+    "fields": [
+      {
+        "name": "nearend_average_blocks",
+        "type": "size_t"
+      },
+      {
+        "name": "normal_tuning",
+        "fields": [
+          {
+            "name": "mask_lf",
+            "fields": [
+              {
+                "name": "enr_transparent",
+                "type": "float"
+              },
+              {
+                "name": "enr_suppress",
+                "type": "float"
+              },
+              {
+                "name": "emr_transparent",
+                "type": "float"
+              }
+            ]
+          },
+          {
+            "name": "mask_hf",
+            "fields": [
+              {
+                "name": "enr_transparent",
+                "type": "float"
+              },
+              {
+                "name": "enr_suppress",
+                "type": "float"
+              },
+              {
+                "name": "emr_transparent",
+                "type": "float"
+              }
+            ]
+          },
+          {
+            "name": "max_inc_factor",
+            "type": "float"
+          },
+          {
+            "name": "max_dec_factor_lf",
+            "type": "float"
+          }
+        ]
+      },
+      {
+        "name": "nearend_tuning",
+        "fields": [
+          {
+            "name": "mask_lf",
+            "fields": [
+              {
+                "name": "enr_transparent",
+                "type": "float"
+              },
+              {
+                "name": "enr_suppress",
+                "type": "float"
+              },
+              {
+                "name": "emr_transparent",
+                "type": "float"
+              }
+            ]
+          },
+          {
+            "name": "mask_hf",
+            "fields": [
+              {
+                "name": "enr_transparent",
+                "type": "float"
+              },
+              {
+                "name": "enr_suppress",
+                "type": "float"
+              },
+              {
+                "name": "emr_transparent",
+                "type": "float"
+              }
+            ]
+          },
+          {
+            "name": "max_inc_factor",
+            "type": "float"
+          },
+          {
+            "name": "max_dec_factor_lf",
+            "type": "float"
+          }
+        ]
+      },
+      {
+        "name": "lf_smoothing_during_initial_phase",
+        "type": "bool"
+      },
+      {
+        "name": "last_permanent_lf_smoothing_band",
+        "type": "int"
+      },
+      {
+        "name": "last_lf_smoothing_band",
+        "type": "int"
+      },
+      {
+        "name": "last_lf_band",
+        "type": "int"
+      },
+      {
+        "name": "first_hf_band",
+        "type": "int"
+      },
+      {
+        "name": "dominant_nearend_detection",
+        "fields": [
+          {
+            "name": "enr_threshold",
+            "type": "float"
+          },
+          {
+            "name": "enr_exit_threshold",
+            "type": "float"
+          },
+          {
+            "name": "snr_threshold",
+            "type": "float"
+          },
+          {
+            "name": "hold_duration",
+            "type": "int"
+          },
+          {
+            "name": "trigger_threshold",
+            "type": "int"
+          },
+          {
+            "name": "use_during_initial_phase",
+            "type": "bool"
+          },
+          {
+            "name": "use_unbounded_echo_spectrum",
+            "type": "bool"
+          }
+        ]
+      },
+      {
+        "name": "subband_nearend_detection",
+        "fields": [
+          {
+            "name": "nearend_average_blocks",
+            "type": "size_t"
+          },
+          {
+            "name": "subband1",
+            "fields": [
+              {
+                "name": "low",
+                "type": "size_t"
+              },
+              {
+                "name": "high",
+                "type": "size_t"
+              }
+            ]
+          },
+          {
+            "name": "subband2",
+            "fields": [
+              {
+                "name": "low",
+                "type": "size_t"
+              },
+              {
+                "name": "high",
+                "type": "size_t"
+              }
+            ]
+          },
+          {
+            "name": "nearend_threshold",
+            "type": "float"
+          },
+          {
+            "name": "snr_threshold",
+            "type": "float"
+          }
+        ]
+      },
+      {
+        "name": "use_subband_nearend_detection",
+        "type": "bool"
+      },
+      {
+        "name": "high_bands_suppression",
+        "fields": [
+          {
+            "name": "enr_threshold",
+            "type": "float"
+          },
+          {
+            "name": "max_gain_during_echo",
+            "type": "float"
+          },
+          {
+            "name": "anti_howling_activation_threshold",
+            "type": "float"
+          },
+          {
+            "name": "anti_howling_gain",
+            "type": "float"
+          }
+        ]
+      },
+      {
+        "name": "high_frequency_suppression",
+        "fields": [
+          {
+            "name": "limiting_gain_band",
+            "type": "int"
+          },
+          {
+            "name": "bands_in_limiting_gain",
+            "type": "int"
+          }
+        ]
+      },
+      {
+        "name": "floor_first_increase",
+        "type": "float"
+      },
+      {
+        "name": "conservative_hf_suppression",
+        "type": "bool"
+      }
+    ]
+  },
+  {
+    "name": "multi_channel",
+    "fields": [
+      {
+        "name": "detect_stereo_content",
+        "type": "bool"
+      },
+      {
+        "name": "stereo_detection_threshold",
+        "type": "float"
+      },
+      {
+        "name": "stereo_detection_timeout_threshold_seconds",
+        "type": "int"
+      },
+      {
+        "name": "stereo_detection_hysteresis_seconds",
+        "type": "float"
+      }
+    ]
+  }
+]

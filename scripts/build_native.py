@@ -43,6 +43,7 @@ def main():
         '--no-history', '--shallow', '--nohooks', '-j', '8', cwd=checkout, env=env)
     run('gclient', 'runhooks', cwd=checkout, env=env)
     source = checkout / 'src'
+    run(sys.executable, ROOT / 'scripts/generate_config.py', '--upstream', source, '--check')
     shutil.copytree(ROOT / 'native', source / 'apm_android', dirs_exist_ok=True)
     cpu = {'arm64-v8a': 'arm64', 'armeabi-v7a': 'arm', 'x86_64': 'x64'}[args.abi]
     output = source / 'out' / args.abi
@@ -64,8 +65,7 @@ def main():
     if unstripped.exists():
         shutil.copy2(unstripped, destination / 'libwebrtc_apm_jni.so.debug')
     run(sys.executable, source / 'tools_webrtc/libs/generate_licenses.py',
-        '--buildfile-dirs', output, '--targets', '//apm_android:webrtc_apm_jni',
-        destination, cwd=source, env=env)
+        '--target', '//apm_android:webrtc_apm_jni', destination, output, cwd=source, env=env)
 
 
 if __name__ == '__main__':

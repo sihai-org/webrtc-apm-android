@@ -10,3 +10,4 @@ dist/
 *.pcm
 *.wav
 *.aecdump
+__pycache__/

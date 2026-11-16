@@ -1,0 +1,298 @@
+[
+  {
+    "name": "pipeline",
+    "fields": [
+      {
+        "name": "maximum_internal_processing_rate",
+        "type": "int"
+      },
+      {
+        "name": "multi_channel_render",
+        "type": "bool"
+      },
+      {
+        "name": "multi_channel_capture",
+        "type": "bool"
+      },
+      {
+        "name": "capture_downmix_method",
+        "enum": [
+          "kAverageChannels",
+          "kUseFirstChannel",
+          "kAdaptive"
+        ]
+      },
+      {
+        "name": "capture_downmix_method_stereo_aec",
+        "enum": [
+          "kAverageChannels",
+          "kUseFirstChannel",
+          "kAdaptive"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "pre_amplifier",
+    "fields": [
+      {
+        "name": "enabled",
+        "type": "bool"
+      },
+      {
+        "name": "fixed_gain_factor",
+        "type": "float"
+      }
+    ]
+  },
+  {
+    "name": "capture_level_adjustment",
+    "fields": [
+      {
+        "name": "enabled",
+        "type": "bool"
+      },
+      {
+        "name": "pre_gain_factor",
+        "type": "float"
+      },
+      {
+        "name": "post_gain_factor",
+        "type": "float"
+      },
+      {
+        "name": "analog_mic_gain_emulation",
+        "fields": [
+          {
+            "name": "enabled",
+            "type": "bool"
+          },
+          {
+            "name": "initial_level",
+            "type": "int"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "name": "high_pass_filter",
+    "fields": [
+      {
+        "name": "enabled",
+        "type": "bool"
+      },
+      {
+        "name": "apply_in_full_band",
+        "type": "bool"
+      }
+    ]
+  },
+  {
+    "name": "echo_canceller",
+    "fields": [
+      {
+        "name": "enabled",
+        "type": "bool"
+      },
+      {
+        "name": "export_linear_aec_output",
+        "type": "bool"
+      },
+      {
+        "name": "enforce_high_pass_filtering",
+        "type": "bool"
+      }
+    ]
+  },
+  {
+    "name": "noise_suppression",
+    "fields": [
+      {
+        "name": "enabled",
+        "type": "bool"
+      },
+      {
+        "name": "level",
+        "enum": [
+          "kLow",
+          "kModerate",
+          "kHigh",
+          "kVeryHigh"
+        ]
+      },
+      {
+        "name": "analyze_linear_aec_output_when_available",
+        "type": "bool"
+      }
+    ]
+  },
+  {
+    "name": "transient_suppression",
+    "fields": [
+      {
+        "name": "enabled",
+        "type": "bool"
+      }
+    ]
+  },
+  {
+    "name": "gain_controller1",
+    "fields": [
+      {
+        "name": "enabled",
+        "type": "bool"
+      },
+      {
+        "name": "mode",
+        "enum": [
+          "kAdaptiveAnalog",
+          "kAdaptiveDigital",
+          "kFixedDigital"
+        ]
+      },
+      {
+        "name": "target_level_dbfs",
+        "type": "int"
+      },
+      {
+        "name": "compression_gain_db",
+        "type": "int"
+      },
+      {
+        "name": "enable_limiter",
+        "type": "bool"
+      },
+      {
+        "name": "analog_gain_controller",
+        "fields": [
+          {
+            "name": "enabled",
+            "type": "bool"
+          },
+          {
+            "name": "startup_min_volume",
+            "type": "int"
+          },
+          {
+            "name": "clipped_level_min",
+            "type": "int"
+          },
+          {
+            "name": "enable_digital_adaptive",
+            "type": "bool"
+          },
+          {
+            "name": "clipped_level_step",
+            "type": "int"
+          },
+          {
+            "name": "clipped_ratio_threshold",
+            "type": "float"
+          },
+          {
+            "name": "clipped_wait_frames",
+            "type": "int"
+          },
+          {
+            "name": "clipping_predictor",
+            "fields": [
+              {
+                "name": "enabled",
+                "type": "bool"
+              },
+              {
+                "name": "mode",
+                "enum": [
+                  "kClippingEventPrediction",
+                  "kAdaptiveStepClippingPeakPrediction",
+                  "kFixedStepClippingPeakPrediction"
+                ]
+              },
+              {
+                "name": "window_length",
+                "type": "int"
+              },
+              {
+                "name": "reference_window_length",
+                "type": "int"
+              },
+              {
+                "name": "reference_window_delay",
+                "type": "int"
+              },
+              {
+                "name": "clipping_threshold",
+                "type": "float"
+              },
+              {
+                "name": "crest_factor_margin",
+                "type": "float"
+              },
+              {
+                "name": "use_predicted_step",
+                "type": "bool"
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "name": "gain_controller2",
+    "fields": [
+      {
+        "name": "enabled",
+        "type": "bool"
+      },
+      {
+        "name": "input_volume_controller",
+        "fields": [
+          {
+            "name": "enabled",
+            "type": "bool"
+          }
+        ]
+      },
+      {
+        "name": "adaptive_digital",
+        "fields": [
+          {
+            "name": "enabled",
+            "type": "bool"
+          },
+          {
+            "name": "headroom_db",
+            "type": "float"
+          },
+          {
+            "name": "max_gain_db",
+            "type": "float"
+          },
+          {
+            "name": "initial_gain_db",
+            "type": "float"
+          },
+          {
+            "name": "max_gain_change_db_per_second",
+            "type": "float"
+          },
+          {
+            "name": "max_output_noise_level_dbfs",
+            "type": "float"
+          }
+        ]
+      },
+      {
+        "name": "fixed_digital",
+        "fields": [
+          {
+            "name": "gain_db",
+            "type": "float"
+          }
+        ]
+      }
+    ]
+  }
+]
