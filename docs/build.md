@@ -40,11 +40,14 @@ python3 scripts/package_native.py incoming
 ./gradlew :apm:assembleRelease :apm:lintRelease
 mkdir -p dist
 cp apm/build/outputs/aar/apm-release.aar dist/webrtc-apm-android-0.1.0.aar
+python3 scripts/verify_aar.py dist/webrtc-apm-android-0.1.0.aar
 ./gradlew :consumer:assembleRelease :consumer:assembleReleaseAndroidTest :consumer:lintRelease
 ./gradlew :consumer:connectedReleaseAndroidTest
 ```
 
 consumer 通过文件依赖引用 `dist/` 中的版本 AAR，不使用 project dependency，防止测试绕过真实打包产物。consumer 使用本机/CI 的 debug key 签名其 release 测试包，不涉及业务 App 签名。
+
+测试 APK 与目标 App 共用 Kotlin runtime，因此 consumer 的测试专用保留规则保存 runtime 和受测公开 API；不把这些规则注入使用方 AAR。Error Prone 注解只作为测试编译依赖，不打包桌面编译器 API。库与测试应用均保留 GN 已完成 strip 的二进制，交付物检查再次核对 AAR 内的 native 字节与构建元数据哈希一致。
 
 模拟器执行入口是 `scripts/emulator_test.sh`。测试没有麦克风和网络权限；验证离线 PCM、配置、dump、错误边界和合成回声。报告由 CI 上传，不能把未执行或失败解释为通过。
 

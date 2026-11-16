@@ -2,7 +2,7 @@
 
 将 Google WebRTC Audio Processing Module 独立包装成 Android AAR，使用官方 AEC3、NS、AGC 等实现。无需 PeerConnection、完整 WebRTC Android SDK 或服务端。
 
-当前处于首个版本构建验收阶段，尚未声明实机声学效果。正式产物以通过验证的 [Releases](https://github.com/sihai-org/webrtc-apm-android/releases) 为准。
+版本 AAR、校验和、构建信息和 native 调试符号通过 [Releases](https://github.com/sihai-org/webrtc-apm-android/releases) 发布。发布前执行三 ABI 构建、交付物校验、Lint 和 Android 模拟器离线音频测试；真实设备声学效果须由使用方验证。
 
 ```kotlin
 val config = ApmConfig().apply {

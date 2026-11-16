@@ -35,6 +35,8 @@ JNI 还验证标量类型、有限数值、公开约束及相互冲突的音量�
 
 ByteBuffer 必须 direct、native byte order，position 对齐采样字节，remaining 足够容纳一帧。浮点多通道布局是完整 channel 0 帧、随后 channel 1 帧……。方法从 position 读取/写入，调用结束不改变 position；output 必须可写。可使用同一 buffer 原位处理，但部分重叠区域或不同格式的原位转换被拒绝。
 
+PCM16 在没有启用处理效果时仍向独立输出 buffer 返回原始输入，不要求调用方预填输出；参考分析和 APM 状态更新照常执行。浮点格式转换保留上游的重采样与通道处理语义。
+
 ```kotlin
 val format = StreamFormat(48000, 1)
 val capture = AudioProcessing.buffer(format)

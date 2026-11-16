@@ -1,5 +1,7 @@
 #!/usr/bin/env bash
 set -euo pipefail
+sdk_root="${ANDROID_HOME:?Android SDK path must be provided by the runner}"
+export PATH="$sdk_root/cmdline-tools/latest/bin:$sdk_root/platform-tools:$sdk_root/emulator:$PATH"
 sdkmanager --install 'platform-tools' 'emulator' 'system-images;android-29;google_apis;x86_64'
 echo no | avdmanager create avd --name apm-ci --package 'system-images;android-29;google_apis;x86_64' --force
 if [[ -e /dev/kvm ]]; then sudo chmod 666 /dev/kvm; fi

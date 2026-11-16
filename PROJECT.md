@@ -18,8 +18,8 @@
 - 自有 Kotlin 接口保留 PCM16 与 planar float、多通道及上游格式约束；不以测试场景限制核心库。
 - 默认配置跟随固定上游，不自动开启算法或系统音效。
 
-## 验证与当前状态
+## 验证与发行状态
 
-项目正在初始化。尚无通过构建或运行的发行产物；完成后实际构建和验收记录以对应 Actions run / Release 为准。
+源码已提供独立 native 构建、Android AAR 包装、生成一致性检查及消费验证应用。每个版本的实际构建和运行证据以对应 Actions run / Release 为准；不能从源码或存在测试推断某次构建已通过。真实设备录放与声学验收属于第二阶段。
 
-入口：`python3 scripts/generate_config.py --help`（能力生成与一致性）；`python3 scripts/build_native.py --help`（Linux native 构建）；`./gradlew :apm:assembleRelease`（AAR）；consumer 仪器测试验证已生成 AAR，不能替代实机声学验收。
+入口：`python3 scripts/generate_config.py --help`（能力生成与一致性）；`python3 scripts/build_native.py --help`（Linux native 构建）；`./gradlew :apm:assembleRelease`（AAR）；`python3 scripts/verify_aar.py <aar>`（交付物检查）；consumer 仪器测试验证已生成 AAR，不能替代实机声学验收。
