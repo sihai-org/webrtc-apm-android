@@ -53,7 +53,7 @@ def main():
                f'android_ndk_api_level={lock["android_api"]} symbol_level=1')
     if cpu == 'arm':
         gn_args += ' arm_version=7'
-    run('gn', 'gen', output, '--args=' + gn_args, cwd=source, env=env)
+    run(sys.executable, depot / 'gn.py', 'gen', output, '--args=' + gn_args, cwd=source, env=env)
     run(source / 'third_party/siso/cipd/siso', 'ninja', '-C', output,
         'apm_android:webrtc_apm_jni', '-j', '4', cwd=source, env=env)
     destination = args.output.resolve() / args.abi
