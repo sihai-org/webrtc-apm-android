@@ -71,7 +71,7 @@ def parse_body(text, parent_types=None):
         statement = text[index:semi].strip()
         index = semi + 1
         before_equal = statement.split('=', 1)[0]
-        if '(' in before_equal or 'operator' in statement or statement.startswith(('static ', 'friend ')):
+        if '(' in before_equal or re.search(r'\boperator\b', statement) or statement.startswith(('static ', 'friend ')):
             continue
         match = re.fullmatch(r'(bool|int|float|size_t|\w+)\s+(\w+)(?:\s*=.*)?', statement, re.S)
         if not match:

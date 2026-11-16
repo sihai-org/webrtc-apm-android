@@ -30,5 +30,8 @@ class ConfigExtractionTest(unittest.TestCase):
         with self.assertRaises(ValueError): parse_body('std::array<float, 5> coefficients;')
         with self.assertRaises(ValueError): parse_body('enum Mode { kA = 10, kB }; Mode mode;')
 
+    def test_operator_substring_in_field_name_is_preserved(self):
+        self.assertEqual('operator_enabled', parse_body('bool operator_enabled = false;')[0]['name'])
+
 
 if __name__ == '__main__': unittest.main()

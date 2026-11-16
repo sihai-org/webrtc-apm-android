@@ -110,7 +110,7 @@ class AudioProcessing(
         checkBuffer(input, source, bytes, false)
         output?.let { checkBuffer(it, destination, bytes, true) }
         if (!floating) {
-            require(source.sampleRateHz in setOf(8000, 16000, 32000, 48000))
+            require(when (source.sampleRateHz) { 8000, 16000, 32000, 48000 -> true; else -> false })
             require(source == destination) { "PCM16 requires matching input/output formats; use float for conversion" }
         } else require(destination.channels == 1 || destination.channels == source.channels)
         return status(NativeBridge.process(handle, direction, floating, input, input.position(), source.sampleRateHz,

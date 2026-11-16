@@ -1,11 +1,14 @@
 import("//webrtc.gni")
 
-rtc_shared_library("webrtc_apm_jni") {
+shared_library("webrtc_apm_jni") {
   sources = [
     "apm_jni.cc",
     "config_generated.h",
     "upstream_generated.h",
   ]
+  configs += rtc_common_configs
+  ldflags = [ "-Wl,--version-script=" + rebase_path("exports.map", root_build_dir) ]
+  inputs = [ "exports.map" ]
   deps = [
     "//api:make_ref_counted",
     "//api/audio:builtin_audio_processing_builder",
@@ -13,7 +16,5 @@ rtc_shared_library("webrtc_apm_jni") {
     "//api/task_queue:task_queue",
     "//modules/audio_processing:residual_echo_detector",
   ]
-  allow_poison = [ "environment_construction" ]
-  java_targets = []
   output_extension = "so"
 }

@@ -17,7 +17,8 @@ def main():
     parser.add_argument('--readelf', default='readelf')
     args = parser.parse_args()
     lock = json.loads((ROOT / 'upstream.lock.json').read_text())
-    manifest = {'upstream': lock, 'libraries': {}}
+    revision = subprocess.check_output(['git', 'rev-parse', 'HEAD'], cwd=ROOT, text=True).strip()
+    manifest = {'wrapper_revision': revision, 'upstream': lock, 'libraries': {}}
     for abi, machine in ABIS.items():
         matches = list(args.artifacts.glob(f'**/{abi}/libwebrtc_apm_jni.so'))
         if len(matches) != 1:
@@ -25,6 +26,9 @@ def main():
         library = matches[0]
         if json.loads((library.parent / 'upstream.lock.json').read_text()) != lock:
             raise SystemExit('Mixed upstream versions: ' + str(library))
+        build = json.loads((library.parent / 'native-build.json').read_text())
+        if build['wrapper_revision'] != revision or build['abi'] != abi:
+            raise SystemExit('Native artifact does not match wrapper commit/ABI: ' + str(library))
         header = subprocess.check_output([args.readelf, '-h', str(library)], text=True)
         if machine not in header:
             raise SystemExit(f'Wrong ELF architecture for {abi}')
@@ -47,7 +51,7 @@ def main():
         shutil.copy2(library, target / library.name)
         resources = ROOT / 'apm/build/native/resources/META-INF/webrtc-apm' / abi
         resources.mkdir(parents=True, exist_ok=True)
-        for name in ['LICENSE.md', 'args.gn', 'upstream.lock.json']:
+        for name in ['LICENSE.md', 'args.gn', 'upstream.lock.json', 'native-build.json']:
             shutil.copy2(library.parent / name, resources / name)
         manifest['libraries'][abi] = {'sha256': hashlib.sha256(library.read_bytes()).hexdigest(), 'needed': needed}
     target = ROOT / 'apm/build/native/resources/META-INF/webrtc-apm/build-info.json'

@@ -62,6 +62,15 @@ def main():
     shutil.copy2(output / 'libwebrtc_apm_jni.so', destination)
     shutil.copy2(output / 'args.gn', destination)
     shutil.copy2(ROOT / 'upstream.lock.json', destination)
+    metadata = {
+        'wrapper_revision': subprocess.check_output(['git', 'rev-parse', 'HEAD'], cwd=ROOT, text=True).strip(),
+        'webrtc_revision': lock['webrtc_revision'],
+        'depot_tools_revision': lock['depot_tools_revision'],
+        'abi': args.abi,
+        'android_api': lock['android_api'],
+        'clang': subprocess.check_output([source / 'third_party/llvm-build/Release+Asserts/bin/clang', '--version'], text=True).strip(),
+    }
+    (destination / 'native-build.json').write_text(json.dumps(metadata, indent=2) + '\n')
     unstripped = output / 'lib.unstripped/libwebrtc_apm_jni.so'
     if unstripped.exists():
         shutil.copy2(unstripped, destination / 'libwebrtc_apm_jni.so.debug')

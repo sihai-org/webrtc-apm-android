@@ -65,4 +65,6 @@ Actions artifacts 用于短期调试和 job 交接；正式版本保存在 Relea
 
 下载 Release AAR 并核对 SHA256SUMS；应用中使用 `implementation(files("libs/webrtc-apm-android-<version>.aar"))`。无需完整 WebRTC SDK，不需要应用自行编译 C++。minSdk 29，Kotlin 2.2+，Java bytecode 11。JNI 类保留规则随 AAR 分发。
 
+文件形式的 AAR 不携带 Maven 依赖元数据。使用 Kotlin Android 插件的应用通常已经提供 stdlib；纯 Java 应用还需添加 `implementation("org.jetbrains.kotlin:kotlin-stdlib:2.2.0")`。
+
 本库不提供设备音频效果开关或业务 VAD 策略。完整格式、同步、资源和参考信号责任见 [API 契约](api.md)。
